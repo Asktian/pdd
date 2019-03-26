@@ -1,0 +1,46 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tw.pdd.mapper.ShoppingCartMapper">
+    <insert id="createShoppingCart">
+        insert into shopping_cart(`uuid`, goods_id, goods_number, goods_price, goods_spec, goods_money)
+        values (
+        <foreach collection="shoppingCart" item="value" index="key" separator=",">
+            #{value}
+        </foreach>
+        )
+    </insert>
+
+    <resultMap id="shoppingCartResultMap" type="shoppingCart">
+        <id property="cartId" column="cart_id"/>
+        <result property="uuid" column="uuid"/>
+        <result property="goodsNumber" column="goods_number"/>
+        <result property="goodsPrice" column="goods_price"/>
+        <result property="goodsMoney" column="goods_money"/>
+        <result property="goodsSpec" column="goods_spec"/>
+        <association property="goods" javaType="goods">
+            <id property="goodsId" column="goods_id"/>
+            <result property="goodsCategoryDetailId" column="goods_category_detail_id"/>
+            <result property="goodsName" column="goods_name"/>
+            <result property="imageUrl" column="image_url"/>
+        </association>
+    </resultMap>
+    <select id="getShoppingCartListByUUID" parameterType="String" resultMap="shoppingCartResultMap">
+        select
+        s.cart_id,
+        s.uuid,
+        s.goods_number,
+        s.goods_price,
+        s.goods_money,
+        s.goods_spec,
+        g.goods_id,
+        g.goods_category_detail_id,
+        g.goods_name,
+        g.image_url
+        from `shopping_cart` s
+        inner join `goods` g
+        on s.goods_id = g.goods_id
+    </select>
+
+    <delete id="deleteShoppingCart" parameterType="int">
+        delete from `shopping_cart` where `cart_id` = #{cartId}
+    </delete>
+</mapper>

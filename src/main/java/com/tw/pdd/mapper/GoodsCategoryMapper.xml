@@ -1,0 +1,36 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tw.pdd.mapper.GoodsCategoryMapper">
+    <select id="getGoodsCategoryList" resultType="goodsCategory">
+        select `name` from goods_category
+    </select>
+
+    <resultMap id="categoryAndGoodsCategory" type="goodsCategory">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <collection property="goodsCategoryDetails" javaType="list" ofType="goodsCategoryDetail">
+            <id property="id" column="detail_id"/>
+            <result property="title" column="title"/>
+            <result property="icon" column="icon"/>
+        </collection>
+    </resultMap>
+    <select id="getGoodsCategoryAndGoodsCategoryDetail" resultMap="categoryAndGoodsCategory">
+        select
+            c1.id,
+            c1.name,
+            c2.id detail_id,
+            c2.title,
+            c2.icon
+        from goods_category_detail c2,goods_category c1
+        where c1.id = c2.goods_category_id
+    </select>
+
+    <resultMap id="goodsBrandResultMap" type="goodsBrand">
+        <id property="id" column="id"/>
+        <result property="goodsCategoryId" column="goods_category_id"/>
+        <result property="title" column="title"/>
+        <result property="goodsBrandImg" column="goods_brand_img"/>
+    </resultMap>
+    <select id="getGoodsBrandList" resultMap="goodsBrandResultMap">
+        select * from goods_brand
+    </select>
+</mapper>

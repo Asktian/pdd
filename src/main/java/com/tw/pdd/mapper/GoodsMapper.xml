@@ -1,0 +1,78 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tw.pdd.mapper.GoodsMapper">
+    <resultMap id="goodsResultMap" type="goods">
+        <id property="goodsId" column="goods_id"/>
+        <result property="goodsCategoryDetailId" column="goods_category_detail_id"/>
+        <result property="goodsName" column="goods_name"/>
+        <result property="shortName" column="short_name"/>
+        <result property="imageUrl" column="image_url"/>
+        <result property="thumbUrl" column="thumb_url"/>
+        <result property="hdThumbUrl" column="hd_thumb_url"/>
+        <result property="num" column="num"/>
+        <result property="price" column="price"/>
+    </resultMap>
+    <select id="getGoodsByQueryVo" parameterType="queryVo" resultMap="goodsResultMap">
+        select
+        goods_id,
+        goods_category_detail_id,
+        goods_name,
+        short_name,
+        image_url,
+        thumb_url,
+        hd_thumb_url,
+        num,
+        price
+        from goods
+        where 1=1
+        <if test="goodsCategoryDetailId != null">
+            and goods_category_detail_id = #{goodsCategoryDetailId}
+        </if>
+        <if test="goodsName != null and goodsName != ''">
+            and goods_name like concat('%',#{goodsName},'%')
+        </if>
+    </select>
+
+    <resultMap id="goodsAndGoodsDetails" type="goods">
+        <id property="goodsId" column="goods_id"/>
+        <result property="goodsCategoryDetailId" column="goods_category_detail_id"/>
+        <result property="goodsName" column="goods_name"/>
+        <result property="num" column="num"/>
+        <result property="price" column="price"/>
+        <association property="goodsDetails" javaType="goodsDetails">
+            <result property="attribute" column="attribute"/>
+            <result property="introduce" column="introduce"/>
+            <result property="imagesDetail" column="imagesDetail"/>
+            <result property="imagesDetail2" column="imagesDetail2"/>
+            <collection property="specKeyList" javaType="list" ofType="specKey">
+                <id property="id" column="id"/>
+                <result property="title" column="title"/>
+                <collection property="specValueList" javaType="list" ofType="specValue">
+                    <result property="value" column="value"/>
+                </collection>
+            </collection>
+        </association>
+    </resultMap>
+    <select id="getGoodsAndDetails" parameterType="Integer" resultMap="goodsAndGoodsDetails">
+        select
+        g.goods_id,
+        g.goods_category_detail_id,
+        g.goods_name,
+        g.num,
+        g.price,
+        g2.attribute,
+        g2.introduce,
+        g2.imagesDetail,
+        g2.imagesDetail2,
+        s.value,
+        s2.id,
+        s2.title
+        from goods g
+        inner join goods_details g2
+        on g.goods_id = g2.goods_id
+        inner join spec_value s
+        on s.goods_id = g2.goods_id
+        inner join spec_key s2
+        on s2.id = s.key_id
+        where g.goods_id = #{goodsId}
+    </select>
+</mapper>

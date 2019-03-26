@@ -1,0 +1,32 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tw.pdd.mapper.ActivityMapper">
+    <resultMap id="activityGoodsResult" type="ActivityDetail">
+        <id property="id" column="id"/>
+        <collection property="goodsList" javaType="list" ofType="goods">
+            <id property="goodsId" column="goods_id"/>
+            <result property="goodsName" column="goods_name"/>
+            <result property="imageUrl" column="image_url"/>
+            <result property="thumbUrl" column="thumb_url"/>
+            <result property="hdThumbUrl" column="hd_thumb_url"/>
+            <result property="num" column="num"/>
+            <result property="price" column="price"/>
+        </collection>
+    </resultMap>
+    <select id="getActivityGoods" parameterType="Integer" resultMap="activityGoodsResult">
+        select
+        h.id,
+        g.goods_id,
+        g.goods_name,
+        g.image_url,
+        g.thumb_url,
+        g.hd_thumb_url,
+        g.num,
+        g.price
+        from homenav h
+        inner join activity_detail a
+        on h.id = a.homeNav_id
+        inner join goods g
+        on a.goods_id = g.goods_id
+        where h.id = #{id}
+    </select>
+</mapper>

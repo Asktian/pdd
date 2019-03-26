@@ -1,0 +1,69 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tw.pdd.mapper.DistrictMapper">
+
+    <resultMap id="districtList" type="province">
+        <id property="provinceId" column="province_id"/>
+        <result property="provinceName" column="province_name"/>
+        <collection property="cityList" javaType="list" ofType="city">
+            <id property="cityId" column="city_id"/>
+            <result property="cityName" column="city_name"/>
+            <result property="zipCode" column="zipcode"/>
+            <collection property="districtList" javaType="list" ofType="district">
+                <id property="districtId" column="district_id"/>
+                <result property="districtName"  column="district_name"/>
+            </collection>
+        </collection>
+    </resultMap>
+    <select id="getDistrictList" resultMap="districtList">
+      select
+      p.province_id,
+      p.province_name,
+      c.city_id,
+      c.city_name,
+      c.zipcode,
+      d.district_id,
+      d.district_name
+      from sys_province p
+      inner join sys_city c
+      on p.province_id = c.province_id
+      inner join sys_district d
+      on c.city_id = d.city_id
+    </select>
+
+    <resultMap id="provinceResultMap" type="province">
+        <id property="provinceId" column="province_id"/>
+        <result property="provinceName" column="province_name"/>
+    </resultMap>
+    <select id="getProvinceList" resultMap="provinceResultMap">
+        select
+        province_id,
+        province_name
+        from sys_province
+    </select>
+
+    <resultMap id="cityResultMap" type="city">
+        <id property="cityId" column="city_id"/>
+        <result property="cityName" column="city_name"/>
+        <result property="zipCode" column="zipcode"/>
+    </resultMap>
+    <select id="getCityListByProvinceId" parameterType="int" resultMap="cityResultMap">
+        select
+        city_id,
+        city_name,
+        zipcode
+        from sys_city
+        where province_id = #{provinceId}
+    </select>
+
+    <resultMap id="districtResultMap" type="district">
+        <id property="districtId" column="district_id"/>
+        <result property="districtName"  column="district_name"/>
+    </resultMap>
+    <select id="getDistrictListByCityId" parameterType="int" resultMap="districtResultMap">
+        select
+        district_id,
+        district_name
+        from sys_district
+        where city_id = #{cityId}
+    </select>
+</mapper>

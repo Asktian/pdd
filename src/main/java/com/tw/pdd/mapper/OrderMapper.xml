@@ -1,0 +1,142 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tw.pdd.mapper.OrderMapper">
+    <insert id="createOrder" parameterType="CreateOrder">
+        insert into `order`(
+                      order_no,
+                      buyer_id,
+                      user_name,
+                      receiver_mobile,
+                      receiver_province,
+                      receiver_city,
+                      receiver_district,
+                      receiver_address,
+                      receiver_name,
+                      order_money,
+                      order_status,
+                      pay_status,
+                      pay_time,
+                      create_time,
+                      finish_time
+        	      )
+        values(
+            #{orderNo},
+            #{buyerId},
+            #{userName},
+            #{receiverMobile},
+            #{receiverProvince},
+            #{receiverCity},
+            #{receiverDistrict},
+            #{receiverAddress},
+            #{receiverName},
+            #{orderMoney},
+            #{orderStatus},
+            #{payStatus},
+            #{payTime},
+            #{createTime},
+            #{finishTime}
+        )
+    </insert>
+
+    <insert id="createOrderDetail" parameterType="createOrderDetail">
+        insert into order_detail(order_no, goods_id, goods_number, goods_spec)
+        values
+        <foreach collection="goodsNumberAndGoodsIdList" index="index" item="cop" open="(" separator="),(" close=")">
+            #{orderNo}, #{cop.goodsId}, #{cop.goodsNumber}, #{cop.goodsSpec}
+        </foreach>
+    </insert>
+
+    <resultMap id="orderResultMap" type="Order">
+        <result property="orderNo" column="order_no"/>
+        <result property="userName" column="user_name"/>
+        <result property="receiverMobile" column="receiver_mobile"/>
+        <result property="receiverAddress" column="receiver_address"/>
+        <result property="receiverName" column="receiver_name"/>
+        <result property="orderMoney" column="order_money"/>
+        <result property="orderStatus" column="order_status"/>
+        <result property="payStatus" column="pay_status"/>
+        <result property="payTime" column="pay_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="finishTime" column="finish_time"/>
+        <result property="flag" column="is_deleted"/>
+        <association property="province" javaType="province">
+            <id property="provinceId" column="province_id"/>
+            <result property="provinceName" column="province_name"/>
+        </association>
+        <association property="city" javaType="city">
+            <id property="city_id" column="cityId"/>
+            <result property="cityName" column="city_name"/>
+            <result property="zipCode" column="zipcode"/>
+        </association>
+        <association property="district" javaType="district">
+            <id property="districtId" column="district_id"/>
+            <result property="districtName" column="district_name"/>
+        </association>
+        <collection property="orderDetailList" javaType="list" ofType="orderDetail">
+            <id property="orderDetailId" column="order_detail_id"/>
+            <result property="goodsSpec" column="goods_spec"/>
+            <result property="goodsNumber" column="goods_number"/>
+            <association property="goods" javaType="goods">
+                <id property="goodsId" column="goods_id"/>
+                <result property="goodsCategoryDetailId" column="goods_category_detail_id"/>
+                <result property="goodsName" column="goods_name"/>
+                <result property="imageUrl" column="image_url"/>
+                <result property="thumbUrl" column="thumb_url"/>
+                <result property="hdThumbUrl" column="hd_thumb_url"/>
+                <result property="price" column="price"/>
+            </association>
+        </collection>
+    </resultMap>
+    <select id="getOrderByUserUUID" parameterType="orderQueryVo" resultMap="orderResultMap">
+        select
+        o.order_no,
+        o.user_name,
+        o.receiver_mobile,
+        o.receiver_address,
+        o.receiver_name,
+        o.order_money,
+        o.order_status,
+        o.pay_status,
+        o.pay_time,
+        o.create_time,
+        o.finish_time,
+        o.is_deleted,
+        o2.order_detail_id,
+        o2.goods_spec,
+        o2.goods_number,
+        p.province_id,
+        p.province_name,
+        c.city_id,
+        c.city_name,
+        c.zipcode,
+        d.district_id,
+        d.district_name,
+        g.goods_id,
+        g.goods_category_detail_id,
+        g.goods_name,
+        g.image_url,
+        g.thumb_url,
+        g.hd_thumb_url,
+        g.price
+        from `order` o
+        inner join sys_province p
+        on o.receiver_province = p.province_id
+        inner join sys_city c
+        on o.receiver_city = c.city_id
+        inner join sys_district d
+        on o.receiver_district = d.district_id
+        inner join `order_detail` o2
+        on o.order_no = o2.order_no
+        inner join `goods` g
+        on o2.goods_id = g.goods_id
+        where o.buyer_id = #{uuid}
+        <if test="orderStatus != null">
+            and o.order_status = #{orderStatus}
+        </if>
+    </select>
+
+    <update id="payOrder" parameterType="createOrder">
+        update `order`
+        set order_status = #{orderStatus}, pay_status = #{payStatus}, pay_time = #{payTime}
+        where order_no = #{orderNo}
+    </update>
+</mapper>
